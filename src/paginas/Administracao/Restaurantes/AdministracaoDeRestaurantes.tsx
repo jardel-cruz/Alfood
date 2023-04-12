@@ -3,6 +3,7 @@ import axios from "axios";
 
 import type IRestaurante from "../../../interfaces/IRestaurante";
 import {
+  Button,
   Paper,
   Table,
   TableBody,
@@ -11,9 +12,11 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function AdministracaoDeRestaurantes() {
   const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -21,24 +24,54 @@ export default function AdministracaoDeRestaurantes() {
       .then((resposta) => setRestaurantes(resposta.data));
   }, []);
 
-  console.log(restaurantes);
+  const excluir = (restaurante: Omit<IRestaurante, "pratos">) => {
+    const url = `http://localhost:8000/api/v2/restaurantes/${restaurante.id}/`;
+    axios.delete(url).then(() => {
+      const listaRestaurantes = restaurantes.filter(
+        (item) => item.id !== restaurante.id
+      );
+      setRestaurantes([...listaRestaurantes]);
+    });
+  };
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Nome</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {restaurantes.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>{item.nome}</TableCell>
+    <>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Nome</TableCell>
+              <TableCell>Editar</TableCell>
+              <TableCell>Excluir</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {restaurantes.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>{item.nome}</TableCell>
+                <TableCell>
+                  <Link to={`/admin/restaurantes/${item.id}`}>Editar</Link>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => excluir(item)}
+                  >
+                    Excluir
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Button
+        variant="outlined"
+        onClick={() => navigate("/admin/restaurantes/novo")}
+      >
+        Adicionar
+      </Button>
+    </>
   );
 }
