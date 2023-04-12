@@ -1,8 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { IPaginacao } from "../../../interfaces/IPaginacao";
-import IPrato from "../../../interfaces/IPrato";
-import IRestaurante from "../../../interfaces/IRestaurante";
+import type IPrato from "../../../interfaces/IPrato";
+import type IRestaurante from "../../../interfaces/IRestaurante";
 import Prato from "../Prato";
 import estilos from "./Restaurante.module.scss";
 
@@ -15,7 +14,7 @@ const Restaurante = ({ restaurante }: RestauranteProps) => {
 
   useEffect(() => {
     axios
-      .get(
+      .get<IPrato[]>(
         `http://localhost:8000/api/v1/restaurantes/${restaurante.id}/pratos/`
       )
       .then((resposta) => setPratos(resposta.data))

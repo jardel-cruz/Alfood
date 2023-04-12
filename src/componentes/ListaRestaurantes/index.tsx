@@ -6,31 +6,43 @@ import type IRestaurante from "../../interfaces/IRestaurante";
 import type { IPaginacao } from "../../interfaces/IPaginacao";
 
 const ListaRestaurantes = () => {
-  const [{ proximaPagina, restaurantes }, setRestaurantes] = useState<{
+  const [data, setRestaurantes] = useState<{
     restaurantes: IRestaurante[];
-    proximaPagina: string;
-  }>({ restaurantes: [], proximaPagina: "" });
+    proximaPagina: string | null;
+    paginaAnterior: string | null;
+  }>({ restaurantes: [], proximaPagina: null, paginaAnterior: null });
 
-  useEffect(() => {
-    axios
-      .get<IPaginacao<IRestaurante>>(
-        "http://localhost:8000/api/v1/restaurantes/"
-      )
-      .then((resposta) =>
-        setRestaurantes({
-          restaurantes: resposta.data.results,
-          proximaPagina: resposta.data.next,
-        })
-      );
-  }, []);
-
-  const verMais = () => {
-    axios.get<IPaginacao<IRestaurante>>(proximaPagina).then((resposta) =>
+  const request = (url: string) => {
+    axios.get<IPaginacao<IRestaurante>>(url).then(({ data }) =>
       setRestaurantes({
-        restaurantes: [...restaurantes, ...resposta.data.results],
-        proximaPagina: resposta.data.next,
+        paginaAnterior: data.previous,
+        proximaPagina: data.next,
+        restaurantes: data.results,
       })
     );
+  };
+
+  useEffect(() => {
+    const url = "http://localhost:8000/api/v1/restaurantes/";
+    request(url);
+  }, []);
+
+  const paginar = (action: "next" | "previous") => {
+    const { paginaAnterior, proximaPagina } = data;
+    const commands = {
+      next: () => {
+        if (proximaPagina) {
+          request(proximaPagina);
+        }
+      },
+      previous: () => {
+        if (paginaAnterior) {
+          request(paginaAnterior);
+        }
+      },
+    };
+
+    return commands[action]();
   };
 
   return (
@@ -38,10 +50,15 @@ const ListaRestaurantes = () => {
       <h1>
         Os restaurantes mais <em>bacanas</em>!
       </h1>
-      {restaurantes.map((item) => (
+      {data.restaurantes.map((item) => (
         <Restaurante restaurante={item} key={item.id} />
       ))}
-      {proximaPagina && <button onClick={verMais}>Ver mais</button>}
+      {data.paginaAnterior && (
+        <button onClick={() => paginar("previous")}>Pagina anterior</button>
+      )}
+      {data.proximaPagina && (
+        <button onClick={() => paginar("next")}>Proxima página</button>
+      )}
     </section>
   );
 };
