@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 
 import type IRestaurante from "../../../interfaces/IRestaurante";
 import {
@@ -13,20 +12,21 @@ import {
   TableRow,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import http from "../../../http";
 
 export default function AdministracaoDeRestaurantes() {
   const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get<IRestaurante[]>("http://localhost:8000/api/v2/restaurantes/")
+    http
+      .get<IRestaurante[]>("/restaurantes/")
       .then((resposta) => setRestaurantes(resposta.data));
   }, []);
 
   const excluir = (restaurante: Omit<IRestaurante, "pratos">) => {
-    const url = `http://localhost:8000/api/v2/restaurantes/${restaurante.id}/`;
-    axios.delete(url).then(() => {
+    const url = `/restaurantes/${restaurante.id}/`;
+    http.delete(url).then(() => {
       const listaRestaurantes = restaurantes.filter(
         (item) => item.id !== restaurante.id
       );
