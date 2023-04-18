@@ -12,8 +12,17 @@ const ListaRestaurantes = () => {
     paginaAnterior: string | null;
   }>({ restaurantes: [], proximaPagina: null, paginaAnterior: null });
 
-  const request = (url: string) => {
-    axios.get<IPaginacao<IRestaurante>>(url).then(({ data }) =>
+  const [busca, setBusca] = useState("");
+
+  const request = (
+    url: string,
+    opcoes?: {
+      params: {
+        search: string;
+      };
+    }
+  ) => {
+    axios.get<IPaginacao<IRestaurante>>(url, opcoes).then(({ data }) =>
       setRestaurantes({
         paginaAnterior: data.previous,
         proximaPagina: data.next,
@@ -45,11 +54,26 @@ const ListaRestaurantes = () => {
     return commands[action]();
   };
 
+  const buscarPratos = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    request("http://localhost:8000/api/v1/restaurantes/", {
+      params: { search: busca },
+    });
+  };
+
   return (
     <section className={style.ListaRestaurantes}>
       <h1>
         Os restaurantes mais <em>bacanas</em>!
       </h1>
+      <form onSubmit={buscarPratos}>
+        <input
+          type="text"
+          value={busca}
+          onChange={({ target }) => setBusca(target.value)}
+        />
+        <button type="submit">Buscar</button>
+      </form>
       {data.restaurantes.map((item) => (
         <Restaurante restaurante={item} key={item.id} />
       ))}

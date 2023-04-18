@@ -21,8 +21,6 @@ const Restaurante = ({ restaurante }: RestauranteProps) => {
       .catch((error) => console.log(error));
   }, [restaurante.id]);
 
-  console.log(pratos, restaurante.id);
-
   return (
     <section className={estilos.Restaurante}>
       <div className={estilos.Titulo}>
