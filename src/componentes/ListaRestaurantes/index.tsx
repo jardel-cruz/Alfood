@@ -13,12 +13,14 @@ const ListaRestaurantes = () => {
   }>({ restaurantes: [], proximaPagina: null, paginaAnterior: null });
 
   const [busca, setBusca] = useState("");
+  const [ordem, setOrdem] = useState("id");
 
   const request = (
     url: string,
     opcoes?: {
       params: {
         search: string;
+        ordering?: string;
       };
     }
   ) => {
@@ -57,8 +59,11 @@ const ListaRestaurantes = () => {
   const buscarPratos = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     request("http://localhost:8000/api/v1/restaurantes/", {
-      params: { search: busca },
+      params: { search: busca, ordering: ordem },
     });
+  };
+  const definirOrdem = ({ target }: React.ChangeEvent<HTMLSelectElement>) => {
+    setOrdem(target.value);
   };
 
   return (
@@ -72,6 +77,10 @@ const ListaRestaurantes = () => {
           value={busca}
           onChange={({ target }) => setBusca(target.value)}
         />
+        <select value={ordem} onChange={definirOrdem}>
+          <option value="id">Por Id</option>
+          <option value="nome">Por nome</option>
+        </select>
         <button type="submit">Buscar</button>
       </form>
       {data.restaurantes.map((item) => (
